@@ -2,13 +2,31 @@
   "name": "vscode-latex-table-editor",
   "displayName": "VSCode LaTex Table Editor",
   "description": "An Open Source WYSIWYG table editor that exports to multiples languages including LaTeX, ConTeXt, Plain TeX, CSV, HTML, BBCode, Eplain, PreTeXt, MediaWiki, Markdown and WML.",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "engines": {
     "vscode": "^1.95.0"
   },
+	"publisher": "alpinebuster",
+	"keywords": [
+		"latex",
+		"table",
+		"visio"
+	],
+	"author": {
+		"email": "imzqqq@hotmail.com",
+		"name": "alpinebuster"
+	},
+	"readme": "./README.md",
+	"icon": "docs/latex_table_editor.png",
   "categories": [
     "Other"
   ],
+	"extensionKind": [
+		"ui"
+	],
+  "repository": {
+		"url": "https://github.com/alpinebuster/vscode-latex_table_editor.git"
+  },
   "activationEvents": [],
   "main": "./dist/extension.js",
   "scripts": {
@@ -21,7 +39,8 @@
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test",
-    "build": "vsce package"
+    "build": "vsce package",
+    "publish": "vsce publish"
   },
   "contributes": {
     "commands": [
