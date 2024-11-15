@@ -23,11 +23,14 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.ViewColumn.One, // Which column appears in the editor
 			{
 				enableScripts: true, // Enable JS, disabled by default
-				retainContextWhenHidden: true, // The webview remains state when hidden to avoid being reset
+				// And restrict the webview to only loading content from our extension's `media` directory.
+				localResourceRoots: [
+					vscode.Uri.joinPath(context.extensionUri, 'latex_table_editor')
+				]
 			} // webview options
         );
 
-		panel.webview.html = getWebViewContent(context, 'latex_table_editor/index.html');
+		panel.webview.html = _getHtmlForWebview(context, panel.webview);
 	});
 
 	context.subscriptions.push(disposable);
@@ -36,16 +39,21 @@ export function activate(context: vscode.ExtensionContext) {
 // This method is called when your extension is deactivated
 export function deactivate() {}
 
-function getWebViewContent(context: vscode.ExtensionContext, templatePath: string) {
-    const resourcePath = path.join(context.extensionPath, templatePath);
-    const dirPath = path.dirname(resourcePath);
-    let html = fs.readFileSync(resourcePath, 'utf-8');
-    // VSCode does not support direct loading of local resources,
-	// need to be replaced with its proprietary path format,
-	// here is simply to replace the style and JS path
-    html = html.replace(/(<link.+?href="|<script.+?src="|<img.+?src=")(.+?)"/g, (m, $1, $2) => {
-        return $1 + vscode.Uri.file(path.resolve(dirPath, $2)).with({ scheme: 'vscode-resource' }).toString() + '"';
-	});
+function _getHtmlForWebview(context: vscode.ExtensionContext, webview: vscode.Webview): string {
+	const templatePath = vscode.Uri.file(
+		path.join(context.extensionPath, 'latex_table_editor', 'index.html')
+	);
+	const pathUri = templatePath.with({ scheme: 'vscode-resource' });  
 
-    return html;
+	let raw = fs.readFileSync(pathUri.fsPath, 'utf8');
+	const htmlContent = raw.replace(/(<a.+?href="|<link.+?href="|<script.+?src="|<img.+?src=")(.+?)"/g, (m, $1, $2) => {
+		if ($2.startsWith('https://')) {
+			return m;
+		} else {
+			const x = vscode.Uri.file(path.resolve(path.dirname(pathUri.fsPath), $2));
+			return $1 + webview.asWebviewUri(x).toString() + '"';
+		}
+	});
+	console.log(htmlContent);
+	return htmlContent;
 }
